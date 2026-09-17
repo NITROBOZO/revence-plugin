@@ -1,20 +1,15 @@
 (() => {
-  var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require : typeof Proxy !== "undefined" ? new Proxy(x, {
-    get: (a, b) => (typeof require !== "undefined" ? require : a)[b]
-  }) : x)(function(x) {
-    if (typeof require !== "undefined") return require.apply(this, arguments);
-    throw Error('Dynamic require of "' + x + '" is not supported');
-  });
+  // NOTE: this sandbox does not provide a real require(). @vendetta/* modules
+  // and React come in as nested properties on the `vendetta` object the
+  // loader hands to this file.
+  var { findByProps } = vendetta.metro;
+  var { ReactNative, React } = vendetta.metro.common;
+  var { before } = vendetta.patcher;
+  var vstorage = vendetta.plugin.storage;
+  var { useProxy } = vendetta.storage;
+  var { Forms } = vendetta.ui.components;
+  var { FormSwitchRow, FormInput, FormSection, FormDivider } = Forms;
 
-  // index.tsx
-  var import_metro = __require("@vendetta/metro");
-  var import_common = __require("@vendetta/metro/common");
-  var import_patcher = __require("@vendetta/patcher");
-  var import_plugin = __require("@vendetta/plugin");
-  var import_storage = __require("@vendetta/storage");
-  var import_components = __require("@vendetta/ui/components");
-  var { FormSwitchRow, FormInput, FormSection, FormDivider } = import_components.Forms;
-  var vstorage = import_plugin.storage;
   function log(...args) {
     if (vstorage.debugLogging) console.log("[MessageCornice]", ...args);
   }
@@ -44,6 +39,7 @@
     log("built cornice:", result);
     return result;
   }
+
   var unpatch;
   function onLoad() {
     vstorage.enabled ??= true;
@@ -53,12 +49,12 @@
     vstorage.borderStyle ??= "box";
     vstorage.debugLogging ??= false;
     console.log("[MessageCornice] onLoad called, enabled =", vstorage.enabled);
-    const Messages = (0, import_metro.findByProps)("sendMessage", "editMessage");
+    const Messages = findByProps("sendMessage", "editMessage");
     if (!Messages) {
       console.log("[MessageCornice] could not find the message-sending module - Discord's internals may have changed");
       return;
     }
-    unpatch = (0, import_patcher.before)("sendMessage", Messages, (args) => {
+    unpatch = before("sendMessage", Messages, (args) => {
       const msg = args[1];
       console.log(
         "[MessageCornice] sendMessage patch fired, enabled =",
@@ -81,8 +77,8 @@
     unpatch?.();
   }
   var settings = () => {
-    (0, import_storage.useProxy)(vstorage);
-    return /* @__PURE__ */ React.createElement(import_common.ReactNative.ScrollView, { style: { flex: 1 } }, /* @__PURE__ */ React.createElement(FormSection, { title: "MessageCornice" }, /* @__PURE__ */ React.createElement(
+    useProxy(vstorage);
+    return React.createElement(ReactNative.ScrollView, { style: { flex: 1 } }, React.createElement(FormSection, { title: "MessageCornice" }, React.createElement(
       FormSwitchRow,
       {
         label: "Enabled",
@@ -90,14 +86,14 @@
         value: vstorage.enabled,
         onValueChange: (v) => vstorage.enabled = v
       }
-    ), /* @__PURE__ */ React.createElement(FormDivider, null), /* @__PURE__ */ React.createElement(
+    ), React.createElement(FormDivider, null), React.createElement(
       FormInput,
       {
         title: "Emoji",
         value: vstorage.emoji,
         onChange: (v) => vstorage.emoji = v
       }
-    ), /* @__PURE__ */ React.createElement(
+    ), React.createElement(
       FormInput,
       {
         title: "Minimum width (emoji units)",
@@ -105,21 +101,21 @@
         keyboardType: "numeric",
         onChange: (v) => vstorage.minWidth = Number(v) || 1
       }
-    ), /* @__PURE__ */ React.createElement(
+    ), React.createElement(
       FormInput,
       {
         title: "Pad character",
         value: vstorage.padSide,
         onChange: (v) => vstorage.padSide = v
       }
-    ), /* @__PURE__ */ React.createElement(
+    ), React.createElement(
       FormInput,
       {
         title: 'Border style ("box" or "ends")',
         value: vstorage.borderStyle,
         onChange: (v) => vstorage.borderStyle = v === "ends" ? "ends" : "box"
       }
-    ), /* @__PURE__ */ React.createElement(FormDivider, null), /* @__PURE__ */ React.createElement(
+    ), React.createElement(FormDivider, null), React.createElement(
       FormSwitchRow,
       {
         label: "Debug logging",
@@ -129,4 +125,6 @@
       }
     )));
   };
+
+  return { onLoad, onUnload, settings };
 })();
