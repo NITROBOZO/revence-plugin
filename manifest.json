@@ -1,0 +1,11 @@
+{
+    "name": "MessageCornice",
+    "description": "Draws a rectangular emoji border around your message text before sending, baked into the message so everyone sees it.",
+    "authors": [
+        { "name": "you", "id": "716944502257877064" }
+    ],
+    "main": "index.js",
+    "vendetta": {
+        "icon": "ic_message"
+    }
+}
